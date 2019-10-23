@@ -26,8 +26,6 @@ for i in range(0, len(file_name)):
 
 print("Black and white pictures created and saved.")
 
-# TODO when converted to b+w and it is the same, delete it... some are already b+w
-
 # create a dictionary of the pictures (read in as arrays)
 X_DICT_BW_TRAIN = dict()
 Y_DICT_COLOR_TRAIN = dict()
