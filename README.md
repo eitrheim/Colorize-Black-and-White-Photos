@@ -1,5 +1,5 @@
 # Colorize-Black-and-White-Photos
-Using convolutional neural network to colorize black and white pictures
+Using convolutional neural network to colorize black and white portraits.
 
-### Training data:
+### Example training data:
 ![](.idea/images/train_images.png)
