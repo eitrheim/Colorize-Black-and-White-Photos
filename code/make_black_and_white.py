@@ -20,7 +20,7 @@ repo_path = '/Users/anneitrheim/PycharmProjects/Colorize-Black-and-White-Photos/
 file_name = [f for f in os.listdir(repo_path + 'data') if f.endswith(('.jpg', '.JPG'))]
 
 for i in range(0, len(file_name)):
-    black_and_white(os.path.join(repo_path + 'data', file_name[i]),
-                    os.path.join(repo_path + 'images', 'bw_'+file_name[i]))
+    black_and_white(os.path.join(repo_path + 'images-colored', file_name[i]),
+                    os.path.join(repo_path + 'images-bw', file_name[i]))
 
 # TODO when converted to b+w and it is the same, delete it... some are already b+w
