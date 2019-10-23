@@ -1,13 +1,5 @@
 from PIL import Image
-import numpy as np
 import os
-
-file_name = [f for f in os.listdir('data') if f.endswith('.jpeg')]
-input_path = []
-output_path = []
-for i in range(0, len(file_name)):
-    input_path.append(os.path.join('data/', file_name[i]))
-    output_path.append(os.path.join('images/', file_name[i]))
 
 
 def black_and_white(input_image_path, output_image_path):
@@ -16,6 +8,9 @@ def black_and_white(input_image_path, output_image_path):
     bw.save(output_image_path)
 
 
-for i in range(0, len(file_name)):
-    black_and_white(input_path[i], output_path[i])
+repo_path = '/Users/anneitrheim/PycharmProjects/Colorize-Black-and-White-Photos/'
+file_name = [f for f in os.listdir(repo_path + 'data') if f.endswith('.jpeg')]
 
+for i in range(0, len(file_name)):
+    black_and_white(os.path.join(repo_path + 'data', file_name[i]),
+                    os.path.join(repo_path + 'images', 'bw_'+file_name[i]))
