@@ -8,3 +8,6 @@ Using convolutional neural network to colorize black and white portraits.
 
 ### Example training data:
 ![](.idea/images/train_images.png)
+
+### Data from:
+ - [2D face sets](http://pics.psych.stir.ac.uk/2D_face_sets.htm) 
