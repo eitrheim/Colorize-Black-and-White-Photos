@@ -1,17 +1,19 @@
 import cv2
+import os
 
-img = cv2.imread('/home/img/python.png', cv2.IMREAD_UNCHANGED)
+width = 200
+height = 200
+import_path = "../images-colored/"
+export_path = "../colored-resized/"
 
-print('Original Dimensions : ', img.shape)
+file_name = [f for f in os.listdir(import_path) if f.endswith(('.jpg', '.JPG', '.tif'))]
 
-scale_percent = 60  # percent of original size
-width = int(img.shape[1] * scale_percent / 100)
-height = int(img.shape[0] * scale_percent / 100)
-dim = (width, height)
-# resize image
-resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-
-print('Resized Dimensions : ', resized.shape)
+for _file in file_name:
+    img = cv2.imread(import_path + _file, cv2.IMREAD_UNCHANGED)
+    dim = (width, height)
+    resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    file = export_path + _file[:-4] + ".jpg"
+    cv2.imwrite(file, resized)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
