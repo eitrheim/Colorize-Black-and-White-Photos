@@ -2,9 +2,12 @@ from keras.preprocessing.image import img_to_array, load_img
 import os
 import numpy as np
 
-def MatrixCreator():
+def MatrixCreator(test=False):
     #Creating folder of images
-    repo_path = '../colored-resized/'
+    if (test == False):
+        repo_path = '../colored-resized/'
+    else:
+        repo_path = '../TestPhoto/'
     file_name = [f for f in os.listdir(repo_path) if f.endswith(('.jpg', '.JPG', '.tif'))]
     print("Working with {0} images".format(len(file_name)))
 
@@ -31,7 +34,7 @@ def MatrixCreator():
         try:
             # Convert to Numpy Array
             x = img_to_array(img)
-            x = x.reshape((3, image_width, image_height))
+            #x = x.reshape((channels, image_width, image_height))
             # Normalize
             x = (x - 128.0) / 128.0
             dataset[i] = x

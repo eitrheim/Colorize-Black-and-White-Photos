@@ -6,8 +6,8 @@ from skimage.io import imsave
 import numpy as np
 import os
 from Creating_Matrix import MatrixCreator
+from Matrix_Creator import CreateMatrix
 
-import Image
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -15,12 +15,10 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 # Get images
 
-matrix = MatrixCreator()
-print(matrix.shape)
-print(matrix[0].shape)
+matrix = CreateMatrix():
 for i in range(matrix.shape[0]):
     image = matrix[i]
-    image = np.transpose(image)
+    #image = np.transpose(image)
     if i == 0:
         X = rgb2lab(1.0/255*image)[:,:,0]
         Y = rgb2lab(1.0/255*image)[:,:,1:]
@@ -61,18 +59,25 @@ model.compile(optimizer='rmsprop', loss='mse')
 model.fit(x=X, y=Y, batch_size=1, epochs=1)
 
 
-color_image = Image.open("../TestPhoto/adrian3.jpg")
-bw = color_image.convert('L')
+testMatrix = MatrixCreator(test = True)
+#testMatrix = np.transpose(testMatrix)
 
+testX = rgb2lab(1.0 / 255 * testMatrix)[:, :, 0]
+testY = rgb2lab(1.0 / 255 * testMatrix)[:, :, 1:]
+testY = testY / 128
+testX = testX.reshape(1, 200, 200, 1)
+testY = testY.reshape(1, 200, 200, 2)
 
 print(model.evaluate(X, Y, batch_size=1))
-output = model.predict(bw)
+output = model.predict(testX)
 output *= 128
 # Output colorizations
-cur = np.zeros((bw.shape[0], bw.shape[1], 3))
-cur[:,:,0] = X[0][:,:,0]
+cur = np.zeros((testX.shape[0], testX.shape[1], 3))
+print(testX[:,:,0].shape)
+print(np.transpose(testX)[:,:,0].shape)
+cur[:,:,0] = testX[:,:,0]
 cur[:,:,1:] = output[0]
-imsave("img_result.png", lab2rgb(cur))
-imsave("img_gray_version.png", rgb2gray(lab2rgb(cur)))
+imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
+imsave("../TestPhoto/img_gray_version.jpg", rgb2gray(lab2rgb(cur)))
 
 
