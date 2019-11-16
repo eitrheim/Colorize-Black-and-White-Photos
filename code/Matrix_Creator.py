@@ -3,6 +3,7 @@ import numpy as np
 from keras.preprocessing.image import img_to_array, load_img
 
 def CreateMatrix(test=False):
+    print("Reshaping images and converting to matrix!")
     i = 0
     image_height = 200
     image_width = 200
@@ -30,4 +31,5 @@ def CreateMatrix(test=False):
         print('Training Data Matrix Shape: ', np.array(x_data).shape)
     else:
         print("Test Data Matrix Shape: ", np.array(x_data).shape)
+    print("Done!")
     return x_data

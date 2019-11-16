@@ -41,18 +41,21 @@ model.add(Conv2D(2, (3, 3), activation='tanh', padding='same'))
 model.compile(optimizer='rmsprop', loss='mse')
 
 model.fit(x=X, y=Y, batch_size=1, epochs=1)
+print(model.evaluate(X, Y, batch_size=1))
+
+
 
 testMatrix = CreateMatrix(test = True)
 testX, testY = ColConvert(testMatrix, "rbg2lab")
 
 
-print(model.evaluate(X, Y, batch_size=1))
+
 output = model.predict(testX)
 output *= 128
 # Output colorizations
 
-cur = np.zeros((testX.shape[0], testX.shape[1])) #TODO, THIS IS FAILING
-cur[:,:,0] = testX[:,:,0]
+cur = np.zeros((testX.shape[1], testX.shape[2], 3))
+cur[:,:,0] = testX[0][:,:,0]
 cur[:,:,1:] = output[0]
 imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
 imsave("../TestPhoto/img_gray_version.jpg", rgb2gray(lab2rgb(cur)))

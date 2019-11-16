@@ -21,5 +21,8 @@ def ColConvert(matrix ,direction):
                 tempY = tempY.reshape(1, 200, 200, 2)
                 X = np.vstack([X, tempX])
                 Y = np.vstack([Y, tempY])
+            if i % 100 == 0 and i > 0:
+                print("%d images colorized" % i)
+    print("%d images colorized" % i)
     print("Done!")
     return X, Y
