@@ -16,13 +16,14 @@ from keras.utils import plot_model
 from keras import backend as K
 
 from skimage import io
-from skimage.transform import resize
+from skimage.transform import resize, rotate, rescale
 from skimage.transform import rotate
 
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import time
+import random
 
 
 start_time = time.time()
@@ -39,17 +40,13 @@ for img_id in file_name:
     resize_size = 2**7  # needs to be sized to 2 to the power of x (2**7 == 128)
     color = resize(color, (resize_size, resize_size))
 
-    # making the training array with the image rotate 0, 90, 180, and 270 degrees, just to make it bigger
+    # making the training array with the image + it rotated
     if 'colored' not in globals():
         colored = [np.array(color)]
-        colored.append(np.array(rotate(color, 90)))
-        colored.append(np.array(rotate(color, 180)))
-        colored.append(np.array(rotate(color, 270)))
+        # colored.append(np.array(rotate(color, random.randint(0, 360), resize=False)))
     else:
         colored.append(np.array(color))
-        colored.append(np.array(rotate(color, 90)))
-        colored.append(np.array(rotate(color, 180)))
-        colored.append(np.array(rotate(color, 270)))
+        # colored.append(np.array(rotate(color, random.randint(0, 360), resize=False)))
 
 colored = np.array(colored)
 print('Shape:', colored.shape)
@@ -96,7 +93,7 @@ x_test_gray = x_test_gray.reshape(x_test_gray.shape[0], img_rows, img_cols, 1)
 ############### build the autoencoder model ###############
 # FIRST - network parameters
 input_shape = (img_rows, img_cols, 1)
-batch_size = 32
+batch_size = 32*4
 kernel_size = 3
 latent_dim = 256
 layer_filters = [64, 128, 256]  # encoder/decoder number of CNN layers and filters per layer
@@ -167,9 +164,9 @@ checkpoint = ModelCheckpoint(filepath=filepath,
 # Mean Square Error (MSE) loss function, Adam optimizer
 autoencoder.compile(loss='mse', optimizer='adam')
 
-# early stopping if validation loss does not improve after 7 epochs
+# early stopping if validation loss does not improve after 11 epochs
 earlystopping = EarlyStopping(monitor='val_loss',
-                              patience=7)
+                              patience=11)
 
 # called every epoch
 callbacks = [lr_reducer, checkpoint, earlystopping]
@@ -177,7 +174,7 @@ callbacks = [lr_reducer, checkpoint, earlystopping]
 
 ############### training the autoencoder ###############
 # load a trained model
-autoencoder = load_model(os.path.join(save_dir, 'colorized_ae_model.h5'))
+# autoencoder = load_model(os.path.join(save_dir, 'colorized_ae_model.h5'))
 
 autoencoder.fit(x_train_gray,
                 x_train,
@@ -190,11 +187,11 @@ autoencoder.fit(x_train_gray,
 ############### get prediction and display 16 images ###############
 x_decoded = autoencoder.predict(x_test_gray)
 
-random_16 = np.random.randint(0, x_test.shape[0], size=16)  # get random 16 numbers
+random_16 = np.random.randint(0, x_test.shape[0], size=8)  # get random 16 numbers
 
 # display og version
 imgs = x_test[random_16]
-imgs = imgs.reshape((4, 4, img_rows, img_cols, channels))
+imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
 imgs = np.vstack([np.hstack(i) for i in imgs])
 plt.figure(figsize=(8, 8))
 plt.axis('off')
@@ -205,7 +202,7 @@ plt.savefig('{}/test_color.png'.format(save_dir))
 
 # display grayscale version of test images
 imgs = x_test_gray[random_16]
-imgs = imgs.reshape((4, 4, img_rows, img_cols))
+imgs = imgs.reshape((4, 2, img_rows, img_cols))
 imgs = np.vstack([np.hstack(i) for i in imgs])
 plt.figure(figsize=(8, 8))
 plt.axis('off')
@@ -216,7 +213,7 @@ plt.savefig('{}/test_gray.png'.format(save_dir))
 
 # display re-colorized images
 imgs = x_decoded[random_16]
-imgs = imgs.reshape((4, 4, img_rows, img_cols, channels))
+imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
 imgs = np.vstack([np.hstack(i) for i in imgs])
 plt.figure(figsize=(8, 8))
 plt.axis('off')
@@ -228,4 +225,61 @@ plt.savefig('{}/test_recolorized.png'.format(save_dir))
 end_time = time.time()
 print('{} seconds to run this python module'.format(round(end_time - start_time)))
 
-# Epoch 00044: val_loss did not improve from 0.01016
+
+############### get prediction of funny pictures ###############
+# repo_path = os.path.dirname(os.getcwd())
+#
+# fun = io.imread(os.path.join(repo_path + '/funny/testMATT.jpeg'))
+# resize_size = 2 ** 7
+# funny = [resize(fun, (resize_size, resize_size))]
+#
+# fun = io.imread(os.path.join(repo_path + '/funny/testZION.jpeg'))
+# fun = resize(fun, (resize_size, resize_size))
+# funny.append(np.array(fun))
+#
+# funny = np.array(funny)
+# print(len(funny))
+# funny_gray = rgb2gray(funny)
+# funny = funny.astype('float32')
+# funny_gray = funny_gray.astype('float32')
+# funny = funny.reshape(funny.shape[0], img_rows, img_cols, channels)
+# funny_gray = funny_gray.reshape(funny_gray.shape[0], img_rows, img_cols, 1)
+#
+# autoencoder = load_model(os.path.join(save_dir, 'colorized_ae_model.h5'))
+# x_decoded = autoencoder.predict(funny_gray)
+#
+# # display og version
+# imgs = funny
+# print(len(funny))
+# imgs = imgs.reshape((2, 1, img_rows, img_cols, channels))
+# imgs = np.vstack([np.hstack(i) for i in imgs])
+# plt.figure(figsize=(8, 8))
+# plt.axis('off')
+# # plt.title('Test color images (Ground  Truth)')
+# plt.imshow(imgs, interpolation='none')
+# plt.savefig('{}/funny_color.png'.format(save_dir))
+# # plt.show()
+#
+# # display grayscale version of test images
+# imgs = funny_gray
+# imgs = imgs.reshape((2, 1, img_rows, img_cols))
+# imgs = np.vstack([np.hstack(i) for i in imgs])
+# plt.figure(figsize=(8, 8))
+# plt.axis('off')
+# # plt.title('Test gray images (Input)')
+# plt.imshow(imgs, interpolation='none', cmap='gray')
+# plt.savefig('{}/funny_gray.png'.format(save_dir))
+# # plt.show()
+#
+# # display re-colorized images
+# imgs = x_decoded
+# imgs = imgs.reshape((2, 1, img_rows, img_cols, channels))
+# imgs = np.vstack([np.hstack(i) for i in imgs])
+# plt.figure(figsize=(8, 8))
+# plt.axis('off')
+# # plt.title('Colorized test images (Predicted)')
+# plt.imshow(imgs, interpolation='none')
+# plt.savefig('{}/funny_recolorized.png'.format(save_dir))
+# # plt.show()
+#
+# print('done')
