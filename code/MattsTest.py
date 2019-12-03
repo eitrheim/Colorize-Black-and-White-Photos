@@ -17,7 +17,7 @@ from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, EarlyStopping
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 batch_size = 10
-epoch_num = 1
+epoch_num = 100
 
 # Get images
 
@@ -39,7 +39,7 @@ lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
                                verbose=1,
                                min_lr=0.5e-6)
 
-earlystopping = EarlyStopping(monitor='val_loss',
+earlystopping = EarlyStopping(monitor='loss',
                               patience=7)
 
 callbacks = [lr_reducer, earlystopping]
@@ -55,7 +55,7 @@ print(model.evaluate(X, Y, batch_size=batch_size))
 testMatrix = CreateMatrix(test = True)
 testX, testY = ColConvert(testMatrix, "rbg2lab")
 
-imsave("../TestPhoto/img_predict.jpg", testX)
+#imsave("../TestPhoto/img_predict.jpg", testX)
 
 
 
@@ -66,6 +66,6 @@ output *= 128
 cur = np.zeros((testX.shape[1], testX.shape[2], 3))
 cur[:,:,0] = testX[0][:,:,0]
 cur[:,:,1:] = output[0]
-#imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
+imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
 imsave("../TestPhoto/img_gray_version.jpg", rgb2gray(lab2rgb(cur)))
 
