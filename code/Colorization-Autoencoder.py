@@ -259,7 +259,6 @@ x_decoded = autoencoder.predict(funny_gray)
 
 # display og version
 imgs = funny
-print(len(funny))
 imgs = imgs.reshape((num_pics, 1, img_rows, img_cols, channels))
 imgs = np.vstack([np.hstack(i) for i in imgs])
 plt.figure(figsize=(8, 8))
