@@ -3,7 +3,7 @@ import os
 
 width = 200
 height = 200
-import_path = "../images-colored/"
+import_path = "../Images/"
 export_path = "../colored-resized/"
 
 file_name = [f for f in os.listdir(import_path) if f.endswith(('.jpg', '.JPG', '.tif'))]

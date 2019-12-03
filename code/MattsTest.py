@@ -1,18 +1,23 @@
-from keras.layers import Conv2D, UpSampling2D, InputLayer
-from keras.models import Sequential
-from keras.preprocessing.image import img_to_array, load_img
+#from keras.layers import Conv2D, UpSampling2D, InputLayer
+#from keras.models import Sequential
+#from keras.preprocessing.image import img_to_array, load_img
 from skimage.color import rgb2lab, lab2rgb, rgb2gray
 from skimage.io import imsave
 import numpy as np
 import os
-from Creating_Matrix import MatrixCreator
+#from Creating_Matrix import MatrixCreator
 from Matrix_Creator import CreateMatrix
 from Convert_Color import ColConvert
+from Model_Creation import ModelCreator
+from keras.callbacks import ReduceLROnPlateau, ModelCheckpoint, EarlyStopping
+#from keras.utils import plot_model
+#from keras import backend as K
 
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
-
+batch_size = 10
+epoch_num = 1
 
 # Get images
 
@@ -22,31 +27,35 @@ X, Y = ColConvert(matrix, "rbg2lab")
 print("Fitting the Model")
 
 # Building the neural network
-model = Sequential()
-model.add(InputLayer(input_shape=(None, None, 1)))
-model.add(Conv2D(8, (3, 3), activation='relu', padding='same', strides=2))
-model.add(Conv2D(8, (3, 3), activation='relu', padding='same'))
-model.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
-model.add(Conv2D(16, (3, 3), activation='relu', padding='same', strides=2))
-model.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-model.add(Conv2D(32, (3, 3), activation='relu', padding='same', strides=2))
-model.add(UpSampling2D((2, 2)))
-model.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-model.add(UpSampling2D((2, 2)))
-model.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
-model.add(UpSampling2D((2, 2)))
-model.add(Conv2D(2, (3, 3), activation='tanh', padding='same'))
+
+model = ModelCreator("RNN")
 
 # Finish model
 model.compile(optimizer='rmsprop', loss='mse')
 
-model.fit(x=X, y=Y, batch_size=1, epochs=1)
-print(model.evaluate(X, Y, batch_size=1))
+lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
+                               cooldown=0,
+                               patience=5,
+                               verbose=1,
+                               min_lr=0.5e-6)
+
+earlystopping = EarlyStopping(monitor='val_loss',
+                              patience=7)
+
+callbacks = [lr_reducer, earlystopping]
+
+model.fit(x=X,
+          y=Y,
+          epochs=epoch_num,
+          callbacks=callbacks)
+print(model.evaluate(X, Y, batch_size=batch_size))
 
 
 
 testMatrix = CreateMatrix(test = True)
 testX, testY = ColConvert(testMatrix, "rbg2lab")
+
+imsave("../TestPhoto/img_predict.jpg", testX)
 
 
 
@@ -57,6 +66,6 @@ output *= 128
 cur = np.zeros((testX.shape[1], testX.shape[2], 3))
 cur[:,:,0] = testX[0][:,:,0]
 cur[:,:,1:] = output[0]
-imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
+#imsave("../TestPhoto/img_predict.jpg", lab2rgb(cur))
 imsave("../TestPhoto/img_gray_version.jpg", rgb2gray(lab2rgb(cur)))
 
