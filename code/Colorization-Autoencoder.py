@@ -3,9 +3,9 @@
 # Colorization autoencoder can be treated like the opposite of denoising autoencoder.
 # Instead of removing noise, colorization adds noise (color) to the grayscale image.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+# from __future__ import absolute_import
+# from __future__ import division
+# from __future__ import print_function
 #
 from keras.layers import Dense, Input
 from keras.layers import Conv2D, Flatten
@@ -147,15 +147,15 @@ autoencoder = Model(inputs, decoder(encoder(inputs)), name='autoencoder')
 ###############  prepare model saving directory and callbacks  ###############
 save_dir = os.path.join(repo_path, 'saved_ae_models')
 # model_name = 'colorized_ae_model.{epoch:03d}.h5'
-model_name = 'colorized_ae_model.h5'
+model_name = 'colorized_ae_model2.h5'
 if not os.path.isdir(save_dir):
     os.makedirs(save_dir)
 filepath = os.path.join(save_dir, model_name)
 
-# reduce learning rate by sqrt(0.1) if the loss does not improve in 5 epochs
+# reduce learning rate by sqrt(0.1) if the loss does not improve in 2 epochs
 lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
                                cooldown=0,
-                               patience=5,
+                               patience=2,
                                verbose=1,
                                min_lr=0.5e-6)
 
@@ -166,11 +166,11 @@ checkpoint = ModelCheckpoint(filepath=filepath,
                              save_best_only=True)
 
 # Mean Square Error (MSE) loss function, Adam optimizer
-autoencoder.compile(loss='mse', optimizer='adam')
+autoencoder.compile(loss='mse', optimizer='adam', metrics=['accuracy', 'mse'])
 
-# early stopping if validation loss does not improve after 11 epochs
+# early stopping if validation loss does not improve after 5 epochs
 earlystopping = EarlyStopping(monitor='val_loss',
-                              patience=11)
+                              patience=5)
 
 # called every epoch
 callbacks = [lr_reducer, checkpoint, earlystopping]
@@ -178,7 +178,7 @@ callbacks = [lr_reducer, checkpoint, earlystopping]
 
 ############### training the autoencoder ###############
 # load a trained model
-# autoencoder = load_model(os.path.join(save_dir, 'colorized_ae_model.h5'))
+# autoencoder = load_model(os.path.join(save_dir, 'colorized_ae_model2.h5'))
 
 autoencoder.fit(x_train_gray,
                 x_train,
@@ -189,42 +189,42 @@ autoencoder.fit(x_train_gray,
 
 
 ############### get prediction and display 16 images ###############
-# x_decoded = autoencoder.predict(x_test_gray)
-#
-# random_16 = np.random.randint(0, x_test.shape[0], size=8)  # get random 16 numbers
-#
-# # display og version
-# imgs = x_test[random_16]
-# imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
-# imgs = np.vstack([np.hstack(i) for i in imgs])
-# plt.figure(figsize=(8, 8))
-# plt.axis('off')
-# plt.title('Test color images (Ground  Truth)')
-# plt.imshow(imgs, interpolation='none')
-# plt.savefig('{}/test_color.png'.format(save_dir))
-# # plt.show()
-#
-# # display grayscale version of test images
-# imgs = x_test_gray[random_16]
-# imgs = imgs.reshape((4, 2, img_rows, img_cols))
-# imgs = np.vstack([np.hstack(i) for i in imgs])
-# plt.figure(figsize=(8, 8))
-# plt.axis('off')
-# plt.title('Test gray images (Input)')
-# plt.imshow(imgs, interpolation='none', cmap='gray')
-# plt.savefig('{}/test_gray.png'.format(save_dir))
-# # plt.show()
-#
-# # display re-colorized images
-# imgs = x_decoded[random_16]
-# imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
-# imgs = np.vstack([np.hstack(i) for i in imgs])
-# plt.figure(figsize=(8, 8))
-# plt.axis('off')
-# plt.title('Colorized test images (Predicted)')
-# plt.imshow(imgs, interpolation='none')
-# plt.savefig('{}/test_recolorized.png'.format(save_dir))
-# # plt.show()
+x_decoded = autoencoder.predict(x_test_gray)
+
+random_16 = np.random.randint(0, x_test.shape[0], size=8)  # get random 16 numbers
+
+# display og version
+imgs = x_test[random_16]
+imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
+imgs = np.vstack([np.hstack(i) for i in imgs])
+plt.figure(figsize=(8, 8))
+plt.axis('off')
+plt.title('Test color images (Ground  Truth)')
+plt.imshow(imgs, interpolation='none')
+plt.savefig('{}/test_color.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
+# plt.show()
+
+# display grayscale version of test images
+imgs = x_test_gray[random_16]
+imgs = imgs.reshape((4, 2, img_rows, img_cols))
+imgs = np.vstack([np.hstack(i) for i in imgs])
+plt.figure(figsize=(8, 8))
+plt.axis('off')
+plt.title('Test gray images (Input)')
+plt.imshow(imgs, interpolation='none', cmap='gray')
+plt.savefig('{}/test_gray.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
+# plt.show()
+
+# display re-colorized images
+imgs = x_decoded[random_16]
+imgs = imgs.reshape((4, 2, img_rows, img_cols, channels))
+imgs = np.vstack([np.hstack(i) for i in imgs])
+plt.figure(figsize=(8, 8))
+plt.axis('off')
+plt.title('Colorized test images (Predicted)')
+plt.imshow(imgs, interpolation='none')
+plt.savefig('{}/test_recolorized.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
+# plt.show()
 
 end_time = time.time()
 print('{} seconds to run this python module'.format(round(end_time - start_time)))
@@ -233,17 +233,17 @@ print('{} seconds to run this python module'.format(round(end_time - start_time)
 ############### get prediction of fun pictures ###############
 repo_path = os.path.dirname(os.getcwd())
 
-fun = io.imread(os.path.join(repo_path + '/fun_test_photos/ASHISH PUJARI.jpeg'))
+fun = io.imread(os.path.join(repo_path + '/fun_test_photos/ASHISH.jpeg'))
 resize_size = 2 ** 7
 funny = [resize(fun, (resize_size, resize_size))]
 
-fun = io.imread(os.path.join(repo_path + '/fun_test_photos/YURI.jpeg'))
-fun = resize(fun, (resize_size, resize_size))
-funny.append(np.array(fun))
-
-fun = io.imread(os.path.join(repo_path + '/fun_test_photos/ANN.jpeg'))
-fun = resize(fun, (resize_size, resize_size))
-funny.append(np.array(fun))
+# fun = io.imread(os.path.join(repo_path + '/fun_test_photos/YURI.jpeg'))
+# fun = resize(fun, (resize_size, resize_size))
+# funny.append(np.array(fun))
+#
+# fun = io.imread(os.path.join(repo_path + '/fun_test_photos/ANN.jpeg'))
+# fun = resize(fun, (resize_size, resize_size))
+# funny.append(np.array(fun))
 
 funny = np.array(funny)
 
@@ -265,7 +265,7 @@ plt.figure(figsize=(8, 8))
 plt.axis('off')
 # plt.title('Test color images (Ground  Truth)')
 plt.imshow(imgs, interpolation='none')
-plt.savefig('{}/fun_color.png'.format(save_dir))
+plt.savefig('{}/fun_color.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
 # plt.show()
 
 # display grayscale version of test images
@@ -276,7 +276,7 @@ plt.figure(figsize=(8, 8))
 plt.axis('off')
 # plt.title('Test gray images (Input)')
 plt.imshow(imgs, interpolation='none', cmap='gray')
-plt.savefig('{}/fun_gray.png'.format(save_dir))
+plt.savefig('{}/fun_gray.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
 # plt.show()
 
 # display re-colorized images
@@ -287,7 +287,7 @@ plt.figure(figsize=(8, 8))
 plt.axis('off')
 # plt.title('Colorized test images (Predicted)')
 plt.imshow(imgs, interpolation='none')
-plt.savefig('{}/fun_recolorized.png'.format(save_dir))
+plt.savefig('{}/fun_recolorized.png'.format(save_dir), bbox_inches = 'tight', pad_inches = 0)
 # plt.show()
 
 print('done')
